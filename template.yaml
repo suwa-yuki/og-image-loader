@@ -1,0 +1,88 @@
+Transform: 'AWS::Serverless-2016-10-31'
+
+Parameters:
+
+  Env:
+    Type: String
+    Description: Environment
+    AllowedValues: [prd, stg, itg]
+    ConstraintDescription: must specify prd, stg or itg.
+    Default: itg
+
+  ExcludePath:
+    Type: String
+    Description: ExcludePath to og:image (Replaced empty string)
+    Default: ''
+
+Resources:
+  OgImageFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      Runtime: nodejs8.10
+      Timeout: 180
+      CodeUri: ./src
+      Environment:
+        Variables:
+          EXCLUDE_PATH: !Ref ExcludePath
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref OgImageApi
+            Path: /og
+            Method: GET
+
+  OgImageApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref Env
+      DefinitionBody:
+        swagger: 2.0
+        info:
+          title: !Sub og-image-api-${Env}
+          description: !Sub og-image-api-${Env}
+          version: 1.0.0
+        schemes:
+          - https
+        basePath: !Sub /${Env}
+        paths:
+          /og:
+            get:
+              produces:
+                - application/json
+              parameters:
+                - name: url
+                  in: query
+                  description: Website URL
+                  required: true
+                  type: string
+                - name: w
+                  in: query
+                  description: Width
+                  required: false
+                  type: integer
+                - name: h
+                  in: query
+                  description: Height
+                  required: false
+                  type: integer
+                - name: t
+                  in: query
+                  description: Content-Type (jpeg, png, gif, webp)
+                  required: false
+                  type: string
+              responses: {}
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${OgImageFunction.Arn}/invocations
+                type: aws_proxy
+        x-amazon-apigateway-binary-media-types: ['application/octet-stream', 'image/jpeg', 'image/png', 'image/gif', 'image/webp']
+
+Outputs:
+  OgImageFunction:
+    Description: Og Image Function
+    Value: !Ref OgImageFunction
+  OgImageApi:
+    Description: Og Image Api Endpoint
+    Value: !Ref OgImageApi
