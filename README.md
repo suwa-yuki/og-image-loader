@@ -14,7 +14,7 @@ $ yarn install
 $ cd ../ 
 ```
 
-### 1. Package
+### 2. Package
 
 ```bash
 $ aws cloudformation package \
@@ -24,7 +24,7 @@ $ aws cloudformation package \
   --profile <your aws profile>
 ```
 
-### 2. Deploy
+### 3. Deploy
 
 ```bash
 $ aws cloudformation deploy \
