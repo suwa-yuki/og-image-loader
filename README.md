@@ -4,6 +4,16 @@ This Application using Serverless Application Model (SAM).
 
 ## How To Deploy
 
+### 1. Install
+
+```bash
+$ cd src
+$ yarn install
+
+# Back to root directory
+$ cd ../ 
+```
+
 ### 1. Package
 
 ```bash
